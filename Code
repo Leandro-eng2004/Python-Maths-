@@ -1,0 +1,291 @@
+#============================================================
+# Question 1a-3D Surface Plots of f(x,y) = e^(-ny) * sin(nx)
+#============================================================
+# Import libraries for numerical computation and plotting
+import numpy as np
+import matplotlib.pyplot as plt
+def question_1a(n,x,y):
+"""
+Computes the function f(x,y) = e^(-n*y)*sin(n*x)
+Parameters
+----------
+n : exponent and frequency parameter
+x : coordinate array
+y : coordinate array
+ Returns: computed function values
+"""
+return np.exp(-n * y) * np.sin(n * x)
+# Create coordinate grid for plotting
+# x ranges from 0 to 10*pi with 100 points
+# y ranges from -pi to pi with 100 points
+x = np.linspace(0, 10*np.pi, 100)
+y = np.linspace(-np.pi, np.pi, 100)
+X, Y = np.meshgrid(x, y) # Creates a 2D grid from 1D arrays
+# Create figure with 2x2 subplots
+fig = plt.figure(figsize=(12, 8))
+# Define different n values to visualize how the function changes
+n_values = [-1, 0.5, 2, 4]
+# Generate surface plots for each n value
+for i, n in enumerate(n_values):
+# Create 3D subplot
+ax = fig.add_subplot(2, 2, i+1, projection='3d')
+# Compute functions values over the grid
+Z = question_1a(n, X, Y)
+# Create surface plot with a colormap
+ax.plot_surface(X, Y, Z, cmap='cividis')
+# Add labels and title
+ax.set_title(f'n = {n}')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+# Adjust layout and display plot
+plt.tight_layout()
+plt.show()
+#=========================================================== 
+# Question 1b-Euler Method for ODE Solution 
+#=========================================================== 
+import numpy as np
+import matplotlib.pyplot as plt
+def euler_method(y0, t0=0, tf=10, dt=0.01):
+"""
+Parameters
+
+----------
+y0:intial value 
+t0:start time-default 0
+tf:final time-default 10
+dt:time step-default 0.01
+ Returns
+-------
+t:array of time points
+y:array of solution values
+"""
+# Create time array from t0 and tf with step st
+t = np.arange(t0, tf + dt, dt)
+# Start solution array with zeros
+y = np.zeros_like(t)
+y[0] = y0 # Set initial condition
+#Euler method
+for i in range(len(t)-1):
+# Compute derivative at current time
+dydt = y[i] * (1-y[i]) - 0.25 *np.sin(2 * np.pi *t[i])
+# Update solution using Euler formula
+y[i + 1] = y[i] + dt * dydt
+return t, y
+def euler_method_solution(y0):
+"""
+Plot solutions for mulriple initial conditions
+Parameters
+----------
+y0:list of initial conditions to plot
+"""
+plt.figure(figsize=(8,6))
+# Plot solution for each initial condition
+for y0 in y0:
+t, y = euler_method(y0)
+plt.plot(t, y, label=f"y_0 = {y0}")
+#Add plot information,like axis labels 
+plt.title("Euler method solution")
+plt.xlabel("t")
+plt.ylabel("y(t)")
+plt.legend()
+plt.grid(True)
+plt.show()
+# Execute the function with sample initial conditions
+euler_method_solution([0.5, 1, 3])
+#===========================================================
+#Question 1c-Pi approximation with error analysis
+#=========================================================== 
+import numpy as np
+import matplotlib.pyplot as plt
+def pi_approx(tol):
+"""
+ Approximates pi using infinite series until error < tolerance
+ Uses formula:pi~ sqrt(12) *((-3)^(-k)/(2k+1))
+Parameters
+----------
+tol:tolerance for error
+ Returns
+-------
+final M value and list of errors at each step
+
+"""
+# Initialize sum to zero-this will accumulate the series terms
+s = 0
+# Precompute constant for efficiency
+sqrt12 = np.sqrt(12)
+# Store errors at each iteration
+errors = []
+# Initialize loop counter M to track the current term num starting from 0
+M = 0
+# While loop condition:Continuing iterating while both conditions are TRUE:
+# M < 100 to prevent infinte loos by limiting to 100 iterations
+# abs(s - np.pi) >= tol:Continue while current error is >/= to tol
+# The loop stops when either conditions become false 
+while M < 100 and abs(s - np.pi) >= tol:
+# Calculate the current term in infinte series
+term = sqrt12 * ((-3) ** -M) / (2 * M + 1)
+# Accumulates the partial sum of the series up to term M
+s += term
+# Calculation of the absolute eroor between the current approx & p 
+error = abs(s - np.pi)
+#Store the error value 
+errors.append(error)
+# Increment the term counter to move to the next term
+M += 1
+return M - 1, errors
+# Execute pi approximation with specified tolerance
+tol = 0.00001
+final_M, errors = pi_approx(tol)
+# Create semi-long plot of convergence
+plt.figure(figsize=(8, 5))
+plt.semilogy(range(len(errors)), errors, 'bo-')
+plt.xlabel('M')
+plt.ylabel('|s - pi|')
+plt.title('Pi Approximation Convergence')
+plt.legend()
+plt.grid(True)
+plt.show()
+# Print converged results
+print(f"Converged at M={final_M} with error={errors[-1]:.8f}")
+#===========================================================
+# Question 1d-Custom n x m matrix with triangular pattern
+#===========================================================
+import numpy as np
+import matplotlib.pyplot as plt
+def upper_matrix(n):
+"""
+Parameters
+----------
+
+n:Size of the square matrix 
+ Returns
+-------
+ A:n x n matrix with specified pattern
+"""
+# Initialize through each row of the matrix
+A = np.zeros((n,n))
+# Iterate through each column
+for i in range(n):
+if (i + 1) % 2 == 0:
+A[i, i:] = i + 1
+else:
+# For odd rows,upper triangular part remains zero
+A[i, i:] = 0
+return A
+# Example for Q1d testing with n=6
+print("Matrix for n = 6:\n", upper_matrix(6))
+#===========================================================
+# Question 1e-Binary matrix from random value
+#===========================================================
+def random_binary(n,m):
+"""
+Parameters
+----------
+n:Number of rows
+ m:Number of columns
+ Returns
+-------
+n xm binary matrix with values 0 or 1
+"""
+# Generate a n x m matrix with random values between 0 and 1
+A = np.random.random((n,m))
+# If element >=0.5,set to 1
+# If element <0.5,set to 0
+return np.where(A >= 0.5,1,0)
+print("\nBinary matrix example (3x4):")
+print(random_binary(3,4))
+#=========================================================== 
+#Question 2-Runge-Kutta 4th Order Method for ODE
+#===========================================================
+import numpy as np
+import matplotlib.pyplot as plt
+# Simple RK4 solver
+def rk4(p, y0):
+"""
+Solves ODE dy/dt + pty = cos(pi*t) using 4th order Runge-kutta method
+Parameters
+----------
+ p:parameter in the ODE (p>0)
+y0:intial condition
+ Returns
+-------
+time array and solution array
+"""
+# Create time array with 500 point from 0 to 10
+t = np.linspace(0, 10, 500)
+
+y = np.zeros(500)
+y[0] = y0 # Set initial condition
+dt = t[1] - t[0] # Calculate time step
+# RK4 iteration
+for i in range(499):
+# Calculate four coefficients
+k1 = np.cos(np.pi*t[i]) - p*t[i]*y[i]
+k2 = np.cos(np.pi*(t[i]+dt/2)) - p*(t[i]+dt/2)*(y[i] + k1*dt/2)
+k3 = np.cos(np.pi*(t[i]+dt/2)) - p*(t[i]+dt/2)*(y[i] + k2*dt/2)
+k4 = np.cos(np.pi*(t[i]+dt)) - p*(t[i]+dt)*(y[i] + k3*dt)
+y[i+1] = y[i] + (k1 + 2*k2 + 2*k3 + k4) * dt / 6
+return t, y
+# Create plot
+plt.figure(figsize=(10, 6))
+# Plot solution for diffenrent p values with fixed intial condition
+for p in [0.2, 0.5, 1.0]:
+t, y = rk4(p, y0=1.0)
+plt.plot(t, y, label=f'p = {p}, y_0 = 1.0')
+# Different initial conditions with fixed p
+for y0 in [0, 2]:
+t, y = rk4(p=1.0, y0=y0)
+plt.plot(t, y, '--', label=f'p = 1.0, y_0 = {y0}')
+#Add plot information,like axis labels 
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title('RK4 Solution: $dy/dt + pty = \cos(\pi t)$')
+plt.legend()
+plt.grid(True)
+plt.show()
+#===========================================================
+#Questiion 3-Possible application of Python in my course
+#===========================================================
+"""
+Python can be very usefull for me specially in my course to deliver a project
+or coursework.As a second year Mechanical Engineering student python can be
+very usefull in the module of Thermodynamics/Thermofluids and any module that 
+involves some type of fluid motion and heat tranfer. 
+In Thermodynamics,I would use Python to solve complex heat tranfers problems.
+For coursework project on heat exchanger design,I would structure my code using
+NumPy for numerical calculations and Matplotlib for the visualization of those 
+calculations.The code would include function to calculate heat tranfer 
+coefficient also solve energy balance equation,and plot temperature 
+distribution across heat exchanger surfaces .I would create arrays to store 
+temperature data at differnet points and use loops to simulate how heat 
+transfers over time.
+For Fluid Mechanics,Python would help me analysing pipe networks when 
+calculating pipe pressure diffences and simulating flow patterns.One orject 
+that may use these ideas could involve writing a script that that will aid me 
+when solving systems of equations for flow rates in complex pipe networks.I 
+could try to create a function to calculate Reynolds numbers,friction 
+coefficient and head losses.This could then be all plotted on a graph like the 
+ones we have just plotted which could show anything from what just listed to 
+velocity distribution and prssure fields.
+In the Material aspect of Mechanical Engineering,Python could handle stress 
+analysis calculation that would be quite difficult by hand.For exmaple,if I was
+given a beam deflection project,I would write a program that calculates the 
+bending moments and shear force at different points along the beam.This code 
+would use array to store the values at diffenret positions and generate plots 
+showing shear force and bending moments diagrams.Stress couls also be 
+calculated using a specific function or equations.
+For Dynamics and Vibration which is a module that i haven't started but have 
+looked a little into what it consists of,I would use Python to simulate certain
+mechanical systems and snalise their motions and behaviour.This would inculde 
+implementing equation of motion using basic integration methods and plot 
+displacement,velocity and acceleration graphs.The code could also attampt to 
+simulate pendulum motion or as the name of the module suggests vibrating 
+systems such as spring mass system such as cars.
+However the most obvious use of Python would just be for Maths in general.
+For linear algebra,Python is eally good at matrix operations and eigenvalue
+
+problems.I could use it for a project that maybe requires me to work on linear
+transformations that could use NumPy arrays to represent matrices and do 
+operations like matrix multiplications.
+"""
